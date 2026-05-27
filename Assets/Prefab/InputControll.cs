@@ -5,13 +5,15 @@ public class InputControll : MonoBehaviour
 {
     [Header("Input Values")]
     public Vector2 move;
-    public bool canAttack = true;
+    public bool attackPressed;
 
     private PlayerInput playerInput;
+
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
     }
+
     private void OnMove(InputValue value)
     {
         move = value.Get<Vector2>();
@@ -19,6 +21,7 @@ public class InputControll : MonoBehaviour
 
     private void OnAttack(InputValue value)
     {
-        canAttack = value.isPressed;
+        if (value.isPressed)
+            attackPressed = true;
     }
 }
