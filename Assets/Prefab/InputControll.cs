@@ -6,16 +6,12 @@ public class InputControll : MonoBehaviour
     [Header("Input Values")]
     public Vector2 move;
     public bool attackPressed;
+    public bool dashPressed;
     private PlayerInput playerInput;
 
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
-    }
-
-    private void Update()
-    {
-        attackPressed = false;
     }
 
     private void OnMove(InputValue value)
@@ -27,5 +23,11 @@ public class InputControll : MonoBehaviour
     {
         if (value.isPressed)
             attackPressed = true;
+    }
+
+    private void OnDash(InputValue value)
+    {
+        if (value.isPressed)
+            dashPressed = true;
     }
 }
