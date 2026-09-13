@@ -31,7 +31,10 @@ public class PlayerController : MonoBehaviour, IStatOwner
     public float dashCooldown = 1f;
 
     [Header("Attack Settings")]
-    public float attackDuration = 0.3f; // duration of attack "busy" state (doesn't block movement)
+    public float attackDuration = 0.3f;
+    public GameObject projectilePrefab;
+    public Transform firePoint; // empty child GameObject positioned in front of the player
+    public int attackDamage = 10;
 
     [Header("Stats")]
     [SerializeField] private CharacterStats stats = new CharacterStats { Name = "Player", MaxHP = 100 };
@@ -228,7 +231,19 @@ public class PlayerController : MonoBehaviour, IStatOwner
         attackState = AttackState.Attacking;
         attackTimer = attackDuration;
         input.attackPressed = false;
-        // hook your actual attack/animation/hitbox trigger here
+
+        Shoot();
+    }
+
+    private void Shoot()
+    {
+        if (projectilePrefab == null) return;
+
+        Vector2 shootDir = lastMoveDirection; // already tracks facing even when idle
+        Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position;
+
+        GameObject proj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
+        proj.GetComponent<Projectile>().Init(shootDir, attackDamage);
     }
 
     #endregion
@@ -265,9 +280,9 @@ public class PlayerController : MonoBehaviour, IStatOwner
     #region Example Hooks
 
     // Example: player steps on a trap
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Trap"))
+        if (other.CompareTag("Enemy"))
             StatManager.Instance.Damage(this, 15);
     }
 
