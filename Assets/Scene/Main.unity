@@ -675,6 +675,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 707613970}
+  - component: {fileID: 707613971}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -697,6 +698,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &707613971
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 707613968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f897c560a6ef8b64298b878248b6cbe8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StatManager
 --- !u!1 &822322455
 GameObject:
   m_ObjectHideFlags: 0
@@ -707,7 +720,7 @@ GameObject:
   m_Component:
   - component: {fileID: 822322456}
   m_Layer: 0
-  m_Name: Player
+  m_Name: Entities
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1697,10 +1710,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb73947a76406894f823002331407080, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::enemy
-  rb: {fileID: 0}
-  capsule: {fileID: 0}
-  damageAmount: 10
-  damageInterval: 1
+  stats:
+    Name: Goblin
+    MaxHP: 40
+    currentHP: 100
+    Attack: 8
+    Defense: 2
+  healthBar: {fileID: 0}
 --- !u!1 &2084841407 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4767366177162575350, guid: e2482c9ad21fc7f41b00b1aafa216d40, type: 3}
@@ -1731,7 +1747,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba476d5b0ebddf489a550d847cdb173, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  maxHealth: 100
+  stats:
+    Name: Player
+    MaxHP: 100
+    currentHP: 100
+    Attack: 10
+    Defense: 5
   healthBar: {fileID: 2084841414}
 --- !u!1001 &581440761541993112
 PrefabInstance:
@@ -1755,7 +1776,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8763573037876034294, guid: 3221194cea273bf438fb65bcf996bfe5, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8763573037876034294, guid: 3221194cea273bf438fb65bcf996bfe5, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1771,11 +1792,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8763573037876034294, guid: 3221194cea273bf438fb65bcf996bfe5, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 160
+      value: -1440
       objectReference: {fileID: 0}
     - target: {fileID: 8763573037876034294, guid: 3221194cea273bf438fb65bcf996bfe5, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 20
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 8763573037876034294, guid: 3221194cea273bf438fb65bcf996bfe5, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1807,11 +1828,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8763573037876034294, guid: 3221194cea273bf438fb65bcf996bfe5, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 8763573037876034294, guid: 3221194cea273bf438fb65bcf996bfe5, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -50
       objectReference: {fileID: 0}
     - target: {fileID: 8763573037876034294, guid: 3221194cea273bf438fb65bcf996bfe5, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

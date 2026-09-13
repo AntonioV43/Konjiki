@@ -1,14 +1,21 @@
 using UnityEngine;
 
 [RequireComponent(typeof(InputControll))]
-public class PlayerControll : MonoBehaviour
+public class PlayerController : MonoBehaviour, IStatOwner
 {
-    // --- Independent state machines ---
+    #region State Machines
+
     private enum MoveState { Idle, Moving }
     private enum DashState { None, Dashing, Cooldown }
     private enum AttackState { None, Attacking }
 
-    private InputControll input;
+    private MoveState moveState = MoveState.Idle;
+    private DashState dashState = DashState.None;
+    private AttackState attackState = AttackState.None;
+
+    #endregion
+
+    #region Inspector Settings
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
@@ -26,18 +33,35 @@ public class PlayerControll : MonoBehaviour
     [Header("Attack Settings")]
     public float attackDuration = 0.3f; // duration of attack "busy" state (doesn't block movement)
 
+    [Header("Stats")]
+    [SerializeField] private CharacterStats stats = new CharacterStats { Name = "Player", MaxHP = 100 };
+
+    [Header("UI")]
+    [SerializeField] private HealthBar healthBar; // drag the player's HealthBar in the Inspector
+
+    #endregion
+
+    #region References & Runtime State
+
+    private InputControll input;
     private Rigidbody2D rb;
 
     private Vector2 moveInput;
     private Vector2 lastMoveDirection = Vector2.down;
 
-    private MoveState moveState = MoveState.Idle;
-    private DashState dashState = DashState.None;
-    private AttackState attackState = AttackState.None;
-
     private float dashTimer;
     private float dashCooldownTimer;
     private float attackTimer;
+
+    #endregion
+
+    #region IStatOwner
+
+    public CharacterStats Stats => stats;
+
+    #endregion
+
+    #region Unity Lifecycle
 
     private void Awake()
     {
@@ -45,9 +69,29 @@ public class PlayerControll : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
     }
 
+    private void OnEnable()
+    {
+        stats.ResetToFull();
+        StatManager.Instance.Register(this);
+        StatManager.Instance.OnHPChanged += HandleHPChanged;
+        StatManager.Instance.OnDeath += HandleDeath;
+
+        if (healthBar != null)
+            healthBar.Initialize(this);
+    }
+
+    private void OnDisable()
+    {
+        if (StatManager.Instance == null) return;
+
+        StatManager.Instance.Unregister(this);
+        StatManager.Instance.OnHPChanged -= HandleHPChanged;
+        StatManager.Instance.OnDeath -= HandleDeath;
+    }
+
     private void Update()
     {
-        move();
+        ReadInput();
 
         UpdateMoveState();
         UpdateDashState();
@@ -68,7 +112,11 @@ public class PlayerControll : MonoBehaviour
             Move();
     }
 
-    private void move()
+    #endregion
+
+    #region Input
+
+    private void ReadInput()
     {
         moveInput = input.move;
 
@@ -76,14 +124,41 @@ public class PlayerControll : MonoBehaviour
             lastMoveDirection = moveInput.normalized;
     }
 
-    // ---------------- Move state ----------------
+    #endregion
+
+    #region Move State
 
     private void UpdateMoveState()
     {
         moveState = moveInput.sqrMagnitude > 0.01f ? MoveState.Moving : MoveState.Idle;
     }
 
-    // ---------------- Dash state ----------------
+    private void Move()
+    {
+        Vector2 direction = moveInput;
+
+        if (normalizeDiagonal && direction.sqrMagnitude > 1f)
+            direction.Normalize();
+
+        Vector2 velocity = direction * moveSpeed;
+        ApplyVelocity(velocity);
+    }
+
+    private void RotateTowardsMovement()
+    {
+        float targetAngle = Mathf.Atan2(moveInput.y, moveInput.x) * Mathf.Rad2Deg;
+        Quaternion targetRotation = Quaternion.Euler(0f, 0f, targetAngle - 90f);
+
+        transform.rotation = Quaternion.RotateTowards(
+            transform.rotation,
+            targetRotation,
+            rotationSpeed * Time.deltaTime
+        );
+    }
+
+    #endregion
+
+    #region Dash State
 
     private void UpdateDashState()
     {
@@ -121,7 +196,15 @@ public class PlayerControll : MonoBehaviour
         dashCooldownTimer = dashCooldown;
     }
 
-    // ---------------- Attack state ----------------
+    private void DashMove()
+    {
+        Vector2 velocity = lastMoveDirection * dashSpeed;
+        ApplyVelocity(velocity);
+    }
+
+    #endregion
+
+    #region Attack State
 
     private void UpdateAttackState()
     {
@@ -148,42 +231,45 @@ public class PlayerControll : MonoBehaviour
         // hook your actual attack/animation/hitbox trigger here
     }
 
-    // ---------------- Movement ----------------
+    #endregion
 
-    private void Move()
+    #region Movement Helper
+
+    private void ApplyVelocity(Vector2 velocity)
     {
-        Vector2 direction = moveInput;
-
-        if (normalizeDiagonal && direction.sqrMagnitude > 1f)
-            direction.Normalize();
-
-        Vector2 velocity = direction * moveSpeed;
-
         if (rb != null)
             rb.MovePosition(rb.position + velocity * Time.fixedDeltaTime);
         else
             transform.position += new Vector3(velocity.x, velocity.y, 0f) * Time.fixedDeltaTime;
     }
 
-    private void DashMove()
-    {
-        Vector2 velocity = lastMoveDirection * dashSpeed;
+    #endregion
 
-        if (rb != null)
-            rb.MovePosition(rb.position + velocity * Time.fixedDeltaTime);
-        else
-            transform.position += new Vector3(velocity.x, velocity.y, 0f) * Time.fixedDeltaTime;
+    #region Stat / Health Callbacks
+
+    private void HandleHPChanged(IStatOwner owner, int oldHP, int newHP, int maxHP)
+    {
+        if (owner != (IStatOwner)this) return;
+        Debug.Log($"{stats.Name} HP: {oldHP} -> {newHP}/{maxHP}");
     }
 
-    private void RotateTowardsMovement()
+    private void HandleDeath(IStatOwner owner)
     {
-        float targetAngle = Mathf.Atan2(moveInput.y, moveInput.x) * Mathf.Rad2Deg;
-        Quaternion targetRotation = Quaternion.Euler(0f, 0f, targetAngle - 90f);
-
-        transform.rotation = Quaternion.RotateTowards(
-            transform.rotation,
-            targetRotation,
-            rotationSpeed * Time.deltaTime
-        );
+        if (owner != (IStatOwner)this) return;
+        Debug.Log($"{stats.Name} died.");
+        // disable input, play death animation, trigger game over, etc.
     }
+
+    #endregion
+
+    #region Example Hooks
+
+    // Example: player steps on a trap
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Trap"))
+            StatManager.Instance.Damage(this, 15);
+    }
+
+    #endregion
 }
