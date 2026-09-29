@@ -9,15 +9,16 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2898054335861796741}
-  - component: {fileID: 442423969869273354}
   - component: {fileID: 4415562139737242062}
   - component: {fileID: 1043195326348628243}
   - component: {fileID: 5641549929420448267}
   - component: {fileID: 1944887599172188594}
-  - component: {fileID: 1446987022020259764}
+  - component: {fileID: 1947199129193363161}
+  - component: {fileID: 8064039469998150280}
+  - component: {fileID: 788743162460565955}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -38,26 +39,6 @@ Transform:
   - {fileID: 4275043187400440433}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &442423969869273354
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4767366177162575350}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 94a293e9ef2a5a54e92c1c3cce670bb6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  moveSpeed: 5
-  normalizeDiagonal: 1
-  rotateTowardsMovement: 1
-  rotationSpeed: 720
-  dashSpeed: 15
-  dashDuration: 0.15
-  dashCooldown: 1
-  attackDuration: 0.3
 --- !u!114 &4415562139737242062
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -152,7 +133,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -9095717837082945937, guid: 207ee8102dd4143d288186ef0be518ee, type: 3}
+  m_Sprite: {fileID: -2413806693520163455, guid: ebe73ca9363db456bacf42c025bb4847, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -189,8 +170,51 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!70 &1446987022020259764
-CapsuleCollider2D:
+--- !u!114 &1947199129193363161
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4767366177162575350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eba476d5b0ebddf489a550d847cdb173, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  moveSpeed: 5
+  normalizeDiagonal: 1
+  rotateTowardsMovement: 1
+  rotationSpeed: 720
+  dashSpeed: 15
+  dashDuration: 0.15
+  dashCooldown: 1
+  attackDuration: 0.3
+  projectilePrefab: {fileID: 2618448626308388121, guid: 99f42304811cda643baec50f51ecb8a4, type: 3}
+  firePoint: {fileID: 4275043187400440433}
+  attackDamage: 10
+  stats:
+    Name: Player
+    MaxHP: 100
+    currentHP: 100
+    Attack: 10
+    Defense: 5
+  healthBar: {fileID: 8064039469998150280}
+--- !u!114 &8064039469998150280
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4767366177162575350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a71e6f1d976334a4aaf77461bbbcb408, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HealthBar
+  slider: {fileID: 0}
+--- !u!58 &788743162460565955
+CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -224,8 +248,7 @@ CapsuleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
-  m_Direction: 0
+  m_Radius: 0.5
 --- !u!1 &4977562909470707681
 GameObject:
   m_ObjectHideFlags: 0
@@ -251,7 +274,7 @@ Transform:
   m_GameObject: {fileID: 4977562909470707681}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

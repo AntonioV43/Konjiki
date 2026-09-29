@@ -7,9 +7,16 @@ public class EnemyController : MonoBehaviour, IStatOwner
     [SerializeField] private HealthBar healthBar; // e.g. a world-space bar above the enemy's head
     public CharacterStats Stats => stats;
 
-    private void OnEnable()
+        private void OnEnable()
     {
         stats.ResetToFull();
+        StartCoroutine(RegisterWhenReady());
+    }
+
+    private System.Collections.IEnumerator RegisterWhenReady()
+    {
+        yield return new WaitUntil(() => StatManager.Instance != null);
+
         StatManager.Instance.Register(this);
 
         if (healthBar != null)
@@ -18,7 +25,10 @@ public class EnemyController : MonoBehaviour, IStatOwner
 
     private void OnDisable()
     {
-        StatManager.Instance.Unregister(this);
+        StopAllCoroutines();
+
+        if (StatManager.Instance != null)
+            StatManager.Instance.Unregister(this);
     }
 
     // Example: player attacks this enemy

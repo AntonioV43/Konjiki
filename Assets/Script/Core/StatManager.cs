@@ -3,44 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Generic stat block shared by players and enemies.
-/// Attach this data to any character via a component that implements IStatOwner.
-/// </summary>
-[Serializable]
-public class CharacterStats
-{
-    public string Name = "Unnamed";
-
-    [Header("Health")]
-    public int MaxHP = 100;
-    [SerializeField] private int currentHP = 100;
-
-    [Header("Other Stats (extend as needed)")]
-    public int Attack = 10;
-    public int Defense = 5;
-
-    public int CurrentHP
-    {
-        get => currentHP;
-        set => currentHP = Mathf.Clamp(value, 0, MaxHP);
-    }
-
-    public bool IsDead => CurrentHP <= 0;
-
-    public void ResetToFull() => CurrentHP = MaxHP;
-}
-
-/// <summary>
-/// Marks a MonoBehaviour as something that owns a CharacterStats block
-/// (e.g. PlayerController, EnemyController).
-/// </summary>
-public interface IStatOwner
-{
-    CharacterStats Stats { get; }
-}
-
-/// <summary>
-/// Central singleton that mediates ALL HP/stat changes for both player and enemies.
+/// Central manager that mediates ALL HP/stat changes for both player and enemies.
 /// Nothing should modify CharacterStats.CurrentHP directly outside of this manager -
 /// always go through Damage()/Heal()/SetHP() so events fire consistently.
 /// </summary>
