@@ -7,7 +7,7 @@ using UnityEngine;
 /// Nothing should modify CharacterStats.CurrentHP directly outside of this manager -
 /// always go through Damage()/Heal()/SetHP() so events fire consistently.
 /// </summary>
-public class StatManager : MonoBehaviour
+public class StatManager : Singleton<StatManager>
 {
     public static StatManager Instance { get; private set; }
 
@@ -24,7 +24,7 @@ public class StatManager : MonoBehaviour
 
     private readonly HashSet<IStatOwner> registered = new HashSet<IStatOwner>();
 
-    private void Awake()
+    override protected void Awake()
     {
         if (Instance != null && Instance != this)
         {

@@ -4,7 +4,7 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour, IStatOwner
 {
     [SerializeField] private CharacterStats stats = new CharacterStats { Name = "Goblin", MaxHP = 40, Attack = 8, Defense = 2 };
-    [SerializeField] private HealthBar healthBar; // e.g. a world-space bar above the enemy's head
+    [SerializeField] private UI_HealthBar healthBar; // e.g. a world-space bar above the enemy's head
     public CharacterStats Stats => stats;
 
         private void OnEnable()

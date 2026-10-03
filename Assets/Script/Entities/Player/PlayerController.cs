@@ -40,7 +40,7 @@ public class PlayerController : MonoBehaviour, IStatOwner
     [SerializeField] private CharacterStats stats = new CharacterStats { Name = "Player", MaxHP = 100 };
 
     [Header("UI")]
-    [SerializeField] private HealthBar healthBar; // drag the player's HealthBar in the Inspector
+    [SerializeField] private UI_HealthBar healthBar; // drag the player's HealthBar in the Inspector
 
     #endregion
 
@@ -75,7 +75,15 @@ public class PlayerController : MonoBehaviour, IStatOwner
     private void OnEnable()
     {
         stats.ResetToFull();
+        StartCoroutine(RegisterWhenReady());
+    }
+
+    private System.Collections.IEnumerator RegisterWhenReady()
+    {
+        yield return new WaitUntil(() => StatManager.Instance != null);
+
         StatManager.Instance.Register(this);
+
         StatManager.Instance.OnHPChanged += HandleHPChanged;
         StatManager.Instance.OnDeath += HandleDeath;
 
@@ -85,11 +93,14 @@ public class PlayerController : MonoBehaviour, IStatOwner
 
     private void OnDisable()
     {
-        if (StatManager.Instance == null) return;
+        StopAllCoroutines();
 
-        StatManager.Instance.Unregister(this);
-        StatManager.Instance.OnHPChanged -= HandleHPChanged;
-        StatManager.Instance.OnDeath -= HandleDeath;
+        if (StatManager.Instance != null)
+        {
+            StatManager.Instance.OnHPChanged -= HandleHPChanged;
+            StatManager.Instance.OnDeath -= HandleDeath;
+            StatManager.Instance.Unregister(this);
+        }
     }
 
     private void Update()
