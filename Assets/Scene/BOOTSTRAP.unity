@@ -150,7 +150,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 324179830}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce11da1f93ace4248a25a7624eb05231, type: 3}
+  m_Script: {fileID: 11500000, guid: dfb66109191fa9a46af08e7270253458, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
 --- !u!4 &324179832
@@ -456,7 +456,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1919794524}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f897c560a6ef8b64298b878248b6cbe8, type: 3}
+  m_Script: {fileID: 11500000, guid: 1292b7f0b444a834aa0ab2aa5874d964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StatManager
 --- !u!4 &1919794526
@@ -503,6 +503,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acc7c780db6f8d446a7957bd6508593c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
+  uiEntries:
+  - type: 2
+    controller: {fileID: 65802952886082313}
 --- !u!4 &1929534819
 Transform:
   m_ObjectHideFlags: 0
@@ -518,11 +521,78 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1951437041 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1043195326348628243, guid: e2482c9ad21fc7f41b00b1aafa216d40, type: 3}
+  m_PrefabInstance: {fileID: 1372552497}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
+--- !u!1 &2030399323
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2030399325}
+  - component: {fileID: 2030399324}
+  m_Layer: 0
+  m_Name: InputManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2030399324
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2030399323}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd4f3d64ec89ed147961b9c69fd3f0c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputManager
+  playerInput: {fileID: 1951437041}
+--- !u!4 &2030399325
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2030399323}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -6.0572, y: -5.80988, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!224 &65802952886082312 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3395890380484182240, guid: 2b7770a8b7a2213489e36ffd7378caac, type: 3}
   m_PrefabInstance: {fileID: 1420329137235684179}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &65802952886082313 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3068395933647487408, guid: 2b7770a8b7a2213489e36ffd7378caac, type: 3}
+  m_PrefabInstance: {fileID: 1420329137235684179}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b7aaa5cb39479c4192d7f675162595e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UI_BuffCards
 --- !u!1001 &1420329137235684179
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -534,10 +604,6 @@ PrefabInstance:
     - target: {fileID: 1015659163310251972, guid: 2b7770a8b7a2213489e36ffd7378caac, type: 3}
       propertyPath: m_Name
       value: BuffCards
-      objectReference: {fileID: 0}
-    - target: {fileID: 1015659163310251972, guid: 2b7770a8b7a2213489e36ffd7378caac, type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3395890380484182240, guid: 2b7770a8b7a2213489e36ffd7378caac, type: 3}
       propertyPath: m_Pivot.x
@@ -631,6 +697,7 @@ SceneRoots:
   - {fileID: 324179832}
   - {fileID: 1919794526}
   - {fileID: 1929534819}
+  - {fileID: 2030399325}
   - {fileID: 569333938}
   - {fileID: 1372552497}
   - {fileID: 1152887077}

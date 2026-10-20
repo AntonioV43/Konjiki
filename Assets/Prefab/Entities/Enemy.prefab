@@ -144,6 +144,7 @@ MonoBehaviour:
     Attack: 8
     Defense: 2
   healthBar: {fileID: 345141344150605022}
+  buffCards: {fileID: 0}
 --- !u!114 &345141344150605022
 MonoBehaviour:
   m_ObjectHideFlags: 0

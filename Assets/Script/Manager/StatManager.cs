@@ -26,6 +26,7 @@ public class StatManager : Singleton<StatManager>
 
     override protected void Awake()
     {
+        base.Awake();
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);

@@ -13,4 +13,16 @@ public class GameManager : Singleton<GameManager>
     {
         SceneManager.LoadScene("Main", LoadSceneMode.Additive);
     }
+
+    public void PauseGame(bool pause)
+    {
+        if (pause)
+        {
+            Time.timeScale = 0f;
+        }
+        else
+        {
+            Time.timeScale = 1f;
+        }
+    }
 }
