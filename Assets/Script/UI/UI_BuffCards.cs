@@ -14,6 +14,9 @@ public class UI_BuffCards : MonoBehaviour, IUIController
         public Button cardButton;
     }
 
+    /// <summary>Dipanggil setelah player memilih buff dan UI sudah ditutup.</summary>
+    public static event System.Action OnBuffSelected;
+
     [SerializeField] private CardSlot[] cardSlots;
     [SerializeField] private List<BuffData> allAvailableBuffs;
 
@@ -63,6 +66,8 @@ public class UI_BuffCards : MonoBehaviour, IUIController
     {
         ApplyBuffToPlayer(selectedBuff);
         UIManager.Instance.Close(UIType.BuffCards);
+
+        OnBuffSelected?.Invoke();
     }
 
     private void ApplyBuffToPlayer(BuffData buff)

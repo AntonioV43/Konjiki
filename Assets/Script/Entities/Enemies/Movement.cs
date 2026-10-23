@@ -1,13 +1,12 @@
 using UnityEngine;
 
 /// <summary>
-/// 2D enemy movement using Unity's NavMeshAgent (with updateRotation/updateUpAxis disabled
-/// for 2D use). States: Idle (roams near spawn), Chase, Search (checks the player's likely
+/// 2D enemy movement using the custom grid-based PathAgent (A* over Tilemaps). States: Idle (roams near spawn), Chase, Search (checks the player's likely
 /// escape route, then wanders the area), Returning (walks back to spawn). Gated by a
 /// field-of-view cone and raycast line-of-sight, so the enemy only reacts to a player it can
-/// actually see. Requires a NavMesh baked in the scene.
+/// actually see. Requires GridPathfinder to be built (RoomController.BuildPathGrid).
 /// </summary>
-[RequireComponent(typeof(UnityEngine.AI.NavMeshAgent))]
+[RequireComponent(typeof(PathAgent))]
 public class Movement : MonoBehaviour
 {
     private enum EnemyState
@@ -85,7 +84,7 @@ public class Movement : MonoBehaviour
     [SerializeField] private bool logStateChanges = false;
     [SerializeField] private bool drawVisionGizmos = true;
 
-    private UnityEngine.AI.NavMeshAgent agent;
+    private PathAgent agent;
     private SpriteRenderer spriteRenderer;
     private EnemyState currentState = EnemyState.Idle;
     private SearchPhase searchPhase;
@@ -109,9 +108,7 @@ public class Movement : MonoBehaviour
 
     private void Awake()
     {
-        agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
-        agent.updateRotation = false; // we handle facing ourselves
-        agent.updateUpAxis = false;   // 2D game
+        agent = GetComponent<PathAgent>();
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 

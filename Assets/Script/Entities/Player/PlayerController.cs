@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem; // Tambahkan ini untuk New Input System
 
 [RequireComponent(typeof(InputControll))]
 public class PlayerController : MonoBehaviour, IStatOwner
@@ -22,7 +23,8 @@ public class PlayerController : MonoBehaviour, IStatOwner
     public bool normalizeDiagonal = true;
 
     [Header("Rotation")]
-    public bool rotateTowardsMovement = true;
+    public bool rotateTowardsMouse = true;
+    public bool rotateTowardsMovement = false;
     public float rotationSpeed = 720f;
 
     [Header("Dash Settings")]
@@ -48,6 +50,7 @@ public class PlayerController : MonoBehaviour, IStatOwner
 
     private InputControll input;
     private Rigidbody2D rb;
+    private Camera mainCam;
 
     private Vector2 moveInput;
     private Vector2 lastMoveDirection = Vector2.down;
@@ -70,6 +73,7 @@ public class PlayerController : MonoBehaviour, IStatOwner
     {
         input = GetComponent<InputControll>();
         rb = GetComponent<Rigidbody2D>();
+        mainCam = Camera.main;
     }
 
     private void OnEnable()
@@ -112,8 +116,13 @@ public class PlayerController : MonoBehaviour, IStatOwner
         UpdateAttackState();
 
         // Rotation: allowed any time you're not mid-dash (dash direction is locked)
-        if (rotateTowardsMovement && moveInput.sqrMagnitude > 0.01f && dashState != DashState.Dashing)
-            RotateTowardsMovement();
+        if (dashState != DashState.Dashing)
+        {
+            if (rotateTowardsMouse)
+                RotateTowardsMouse();
+            else if (rotateTowardsMovement && moveInput.sqrMagnitude > 0.01f)
+                RotateTowardsMovement();
+        }
     }
 
     private void FixedUpdate()
@@ -156,6 +165,40 @@ public class PlayerController : MonoBehaviour, IStatOwner
 
         Vector2 velocity = direction * moveSpeed;
         ApplyVelocity(velocity);
+    }
+
+    private void RotateTowardsMouse()
+    {
+        if (mainCam == null) mainCam = Camera.main;
+        if (mainCam == null || Mouse.current == null) return;
+
+        // 1. Baca posisi kursor dari New Input System
+        Vector3 mouseScreenPos = Mouse.current.position.ReadValue();
+
+        // 2. Buat Ray dari kamera menuju titik kursor di layar
+        Ray ray = mainCam.ScreenPointToRay(mouseScreenPos);
+
+        // 3. Buat bidang (Plane) 2D pada posisi Z karakter (biasanya Z = 0)
+        Plane xyPlane = new Plane(Vector3.forward, new Vector3(0f, 0f, transform.position.z));
+
+        // 4. Hitung titik potong antara Ray dan Plane
+        if (xyPlane.Raycast(ray, out float distance))
+        {
+            Vector3 mouseWorldPos = ray.GetPoint(distance);
+            Vector2 lookDirection = (Vector2)(mouseWorldPos - transform.position);
+
+            if (lookDirection.sqrMagnitude > 0.001f)
+            {
+                float targetAngle = Mathf.Atan2(lookDirection.y, lookDirection.x) * Mathf.Rad2Deg;
+                Quaternion targetRotation = Quaternion.Euler(0f, 0f, targetAngle - 90f);
+
+                transform.rotation = Quaternion.RotateTowards(
+                    transform.rotation,
+                    targetRotation,
+                    rotationSpeed * Time.deltaTime
+                );
+            }
+        }
     }
 
     private void RotateTowardsMovement()
@@ -250,10 +293,10 @@ public class PlayerController : MonoBehaviour, IStatOwner
     {
         if (projectilePrefab == null) return;
 
-        Vector2 shootDir = lastMoveDirection; // already tracks facing even when idle
+        Vector2 shootDir = rotateTowardsMouse ? (Vector2)transform.up : lastMoveDirection;
         Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position;
 
-        GameObject proj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
+        GameObject proj = Instantiate(projectilePrefab, spawnPos, transform.rotation);
         proj.GetComponent<Projectile>().Init(shootDir, attackDamage);
     }
 
@@ -283,14 +326,12 @@ public class PlayerController : MonoBehaviour, IStatOwner
     {
         if (owner != (IStatOwner)this) return;
         Debug.Log($"{stats.Name} died.");
-        // disable input, play death animation, trigger game over, etc.
     }
 
     #endregion
 
     #region Example Hooks
 
-    // Example: player steps on a trap
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Enemy"))

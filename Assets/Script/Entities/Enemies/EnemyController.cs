@@ -62,8 +62,7 @@ public class EnemyController : MonoBehaviour, IStatOwner
 
         Debug.Log($"{stats.Name} died.");
 
-        UIManager.Instance.Open(UIType.BuffCards);
-
+        // Buff cards sekarang dibuka oleh RoomController saat semua musuh habis
         Destroy(gameObject);
     }
 }
