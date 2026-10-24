@@ -78,8 +78,6 @@ Transform:
   m_Children:
   - {fileID: 4686168963845166626}
   - {fileID: 2085304946076638580}
-  - {fileID: 3539530257179065491}
-  - {fileID: 1446753308667797031}
   - {fileID: 2447512964072569984}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -96,45 +94,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomController
   playerSpawnPoint: {fileID: 2085304946076638580}
-  enemySpawnPoints:
-  - {fileID: 3539530257179065491}
-  - {fileID: 1446753308667797031}
+  enemySpawnPoints: []
   enemyPrefabs:
   - {fileID: 1489629893504525201, guid: 5663aee566efbbc42bb1b08578a7ccea, type: 3}
+  useRandomSpawn: 1
+  minEnemies: 2
+  maxEnemies: 4
+  minDistanceFromPlayer: 4
+  minDistanceBetweenEnemies: 1.5
   groundTilemap: {fileID: 6690727019974222199}
   wallTilemap: {fileID: 1321072441495149048}
   exitDoor: {fileID: 4342461225299864320}
---- !u!1 &3117361373987301535
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3539530257179065491}
-  m_Layer: 0
-  m_Name: SP
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &3539530257179065491
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3117361373987301535}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.53, y: 5.14, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2183124922660378253}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4342461225299864320
 GameObject:
   m_ObjectHideFlags: 0
@@ -3258,37 +3228,6 @@ TilemapRenderer:
   m_SortOrder: 0
   m_Mode: 0
   m_DetectChunkCullingBounds: 0
---- !u!1 &6509549733188411949
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1446753308667797031}
-  m_Layer: 0
-  m_Name: SP (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1446753308667797031
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6509549733188411949}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.14, y: 2.53, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2183124922660378253}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6612716464989469957
 GameObject:
   m_ObjectHideFlags: 0

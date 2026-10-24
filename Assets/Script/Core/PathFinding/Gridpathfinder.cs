@@ -28,6 +28,7 @@ public static class GridPathfinder
     private static float[] gCost;
     private static int[] parent;
     private static bool[] closed;
+    private static readonly List<int> walkableCells = new List<int>();
     private static readonly List<HeapItem> heap = new List<HeapItem>();
 
     public static bool IsReady => walkable != null && refMap != null;
@@ -56,6 +57,7 @@ public static class GridPathfinder
         gCost = new float[n];
         parent = new int[n];
         closed = new bool[n];
+        walkableCells.Clear();
 
         for (int y = 0; y < height; y++)
         {
@@ -64,7 +66,9 @@ public static class GridPathfinder
                 Vector3Int cell = new Vector3Int(origin.x + x, origin.y + y, origin.z);
                 bool isGround = ground.HasTile(cell);
                 bool isWall = wall != null && wall.HasTile(cell);
-                walkable[y * width + x] = isGround && !isWall;
+                bool ok = isGround && !isWall;
+                walkable[y * width + x] = ok;
+                if (ok) walkableCells.Add(y * width + x);
             }
         }
     }
@@ -73,6 +77,7 @@ public static class GridPathfinder
     {
         refMap = null;
         walkable = null;
+        walkableCells.Clear();
     }
 
     // ---------------- Query ----------------
@@ -81,6 +86,17 @@ public static class GridPathfinder
     {
         if (!IsReady) return false;
         return InBounds(WorldToGrid(world, out int x, out int y), x, y) && walkable[y * width + x];
+    }
+
+    /// <summary>Ambil titik tengah cell walkable secara acak (hanya di Ground, bukan Wall).</summary>
+    public static bool TryGetRandomWalkablePosition(out Vector2 position)
+    {
+        position = Vector2.zero;
+        if (!IsReady || walkableCells.Count == 0) return false;
+
+        int idx = walkableCells[Random.Range(0, walkableCells.Count)];
+        position = CellCenter(idx % width, idx / width);
+        return true;
     }
 
     /// <summary>Cari path dari start ke end (world position). Hasil berisi waypoint, TANPA cell awal.</summary>
