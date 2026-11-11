@@ -7,7 +7,7 @@ using UnityEngine;
 /// actually see. Requires GridPathfinder to be built (RoomController.BuildPathGrid).
 /// </summary>
 [RequireComponent(typeof(PathAgent))]
-public class Movement : MonoBehaviour
+public class EnemyMovement : MonoBehaviour
 {
     private enum EnemyState
     {
