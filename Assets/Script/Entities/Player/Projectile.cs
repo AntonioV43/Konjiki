@@ -2,35 +2,64 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    public float speed = 12f;
-    public float lifetime = 2f;
-    public int damage = 10;
-    public LayerMask hitMask; // set to "Enemy" layer in Inspector
+    public LayerMask hitMask; // Set ke layer "Enemy" di Inspector
 
+    private IStatOwner attacker;
     private Vector2 direction;
+    private float speed;
+    private int damage;
+    private bool hasHit;
+    private Rigidbody2D rb;
 
-    public void Init(Vector2 dir, int dmg)
+    private void Awake()
     {
-        direction = dir.normalized;
-        damage = dmg;
-        Destroy(gameObject, lifetime);
+        if (TryGetComponent(out rb))
+        {
+            rb.gravityScale = 0f;
+            rb.linearDamping = 0f;
+        }
     }
 
-    private void Update()
+    public void Init(IStatOwner owner, Vector2 dir, float moveSpeed, float lifeTime, int dmg)
     {
-        transform.position += (Vector3)(direction * speed * Time.deltaTime);
+        attacker = owner;
+        direction = dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector2.up;
+        speed = Mathf.Max(0.1f, moveSpeed);
+        damage = dmg;
+        hasHit = false;
+
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
+
+        if (rb != null)
+            rb.linearVelocity = direction * speed;
+
+        Destroy(gameObject, Mathf.Max(0.05f, lifeTime));
+    }
+
+    private void FixedUpdate()
+    {
+        if (rb == null)
+        {
+            transform.position += (Vector3)(direction * speed * Time.fixedDeltaTime);
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // Ignore anything not on the enemy layer
+        if (hasHit)
+            return;
+
         if (((1 << other.gameObject.layer) & hitMask) == 0)
             return;
 
-        var enemy = other.GetComponent<EnemyController>();
-        if (enemy != null)
+        if (other.TryGetComponent<EnemyController>(out var enemy))
         {
-            StatManager.Instance.Damage(enemy, damage);
+            hasHit = true;
+
+            if (StatManager.Instance != null)
+                StatManager.Instance.DealDamageWithDefense(attacker, enemy, damage);
+
             Destroy(gameObject);
         }
     }

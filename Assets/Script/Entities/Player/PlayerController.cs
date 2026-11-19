@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.InputSystem; // Tambahkan ini untuk New Input System
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(InputControll))]
 public class PlayerController : MonoBehaviour, IStatOwner
@@ -8,11 +8,9 @@ public class PlayerController : MonoBehaviour, IStatOwner
 
     private enum MoveState { Idle, Moving }
     private enum DashState { None, Dashing, Cooldown }
-    private enum AttackState { None, Attacking }
 
     private MoveState moveState = MoveState.Idle;
     private DashState dashState = DashState.None;
-    private AttackState attackState = AttackState.None;
 
     #endregion
 
@@ -33,16 +31,18 @@ public class PlayerController : MonoBehaviour, IStatOwner
     public float dashCooldown = 1f;
 
     [Header("Attack Settings")]
-    public float attackDuration = 0.3f;
+    [Tooltip("Jumlah tembakan per detik")]
+    public float fireRate = 3f;
     public GameObject projectilePrefab;
-    public Transform firePoint; // empty child GameObject positioned in front of the player
-    public int attackDamage = 10;
+    public Transform firePoint;
+    public float projectileSpeed = 12f;
+    public float projectileLifetime = 2f;
 
-    [Header("Stats")]
-    [SerializeField] private CharacterStats stats = new CharacterStats { Name = "Player", MaxHP = 100 };
+    [Header("Stats (Single Source of Damage)")]
+    [SerializeField] private CharacterStats stats = new CharacterStats { Name = "Player", MaxHP = 100, Attack = 10 };
 
     [Header("UI")]
-    [SerializeField] private UI_HealthBar healthBar; // drag the player's HealthBar in the Inspector
+    [SerializeField] private UI_HealthBar healthBar;
 
     #endregion
 
@@ -57,7 +57,9 @@ public class PlayerController : MonoBehaviour, IStatOwner
 
     private float dashTimer;
     private float dashCooldownTimer;
-    private float attackTimer;
+    private float nextAttackTime;
+
+    public float AttackInterval => 1f / Mathf.Max(0.01f, fireRate);
 
     #endregion
 
@@ -87,7 +89,6 @@ public class PlayerController : MonoBehaviour, IStatOwner
         yield return new WaitUntil(() => StatManager.Instance != null);
 
         StatManager.Instance.Register(this);
-
         StatManager.Instance.OnHPChanged += HandleHPChanged;
         StatManager.Instance.OnDeath += HandleDeath;
 
@@ -113,9 +114,8 @@ public class PlayerController : MonoBehaviour, IStatOwner
 
         UpdateMoveState();
         UpdateDashState();
-        UpdateAttackState();
+        UpdateAttack();
 
-        // Rotation: allowed any time you're not mid-dash (dash direction is locked)
         if (dashState != DashState.Dashing)
         {
             if (rotateTowardsMouse)
@@ -127,8 +127,6 @@ public class PlayerController : MonoBehaviour, IStatOwner
 
     private void FixedUpdate()
     {
-        // Dash always overrides normal movement while active.
-        // Attack does NOT block movement — you can walk and attack at the same time.
         if (dashState == DashState.Dashing)
             DashMove();
         else
@@ -137,7 +135,7 @@ public class PlayerController : MonoBehaviour, IStatOwner
 
     #endregion
 
-    #region Input
+    #region Input & Aim Helper
 
     private void ReadInput()
     {
@@ -147,9 +145,28 @@ public class PlayerController : MonoBehaviour, IStatOwner
             lastMoveDirection = moveInput.normalized;
     }
 
+    private bool TryGetMouseWorldPosition(out Vector3 mouseWorldPos)
+    {
+        mouseWorldPos = Vector3.zero;
+        if (mainCam == null) mainCam = Camera.main;
+        if (mainCam == null || Mouse.current == null) return false;
+
+        Vector3 mouseScreenPos = Mouse.current.position.ReadValue();
+        Ray ray = mainCam.ScreenPointToRay(mouseScreenPos);
+        Plane xyPlane = new Plane(Vector3.forward, new Vector3(0f, 0f, transform.position.z));
+
+        if (xyPlane.Raycast(ray, out float distance))
+        {
+            mouseWorldPos = ray.GetPoint(distance);
+            return true;
+        }
+
+        return false;
+    }
+
     #endregion
 
-    #region Move State
+    #region Move & Rotation
 
     private void UpdateMoveState()
     {
@@ -163,41 +180,24 @@ public class PlayerController : MonoBehaviour, IStatOwner
         if (normalizeDiagonal && direction.sqrMagnitude > 1f)
             direction.Normalize();
 
-        Vector2 velocity = direction * moveSpeed;
-        ApplyVelocity(velocity);
+        ApplyVelocity(direction * moveSpeed);
     }
 
     private void RotateTowardsMouse()
     {
-        if (mainCam == null) mainCam = Camera.main;
-        if (mainCam == null || Mouse.current == null) return;
+        if (!TryGetMouseWorldPosition(out Vector3 mouseWorldPos)) return;
 
-        // 1. Baca posisi kursor dari New Input System
-        Vector3 mouseScreenPos = Mouse.current.position.ReadValue();
-
-        // 2. Buat Ray dari kamera menuju titik kursor di layar
-        Ray ray = mainCam.ScreenPointToRay(mouseScreenPos);
-
-        // 3. Buat bidang (Plane) 2D pada posisi Z karakter (biasanya Z = 0)
-        Plane xyPlane = new Plane(Vector3.forward, new Vector3(0f, 0f, transform.position.z));
-
-        // 4. Hitung titik potong antara Ray dan Plane
-        if (xyPlane.Raycast(ray, out float distance))
+        Vector2 lookDirection = (Vector2)(mouseWorldPos - transform.position);
+        if (lookDirection.sqrMagnitude > 0.001f)
         {
-            Vector3 mouseWorldPos = ray.GetPoint(distance);
-            Vector2 lookDirection = (Vector2)(mouseWorldPos - transform.position);
+            float targetAngle = Mathf.Atan2(lookDirection.y, lookDirection.x) * Mathf.Rad2Deg;
+            Quaternion targetRotation = Quaternion.Euler(0f, 0f, targetAngle - 90f);
 
-            if (lookDirection.sqrMagnitude > 0.001f)
-            {
-                float targetAngle = Mathf.Atan2(lookDirection.y, lookDirection.x) * Mathf.Rad2Deg;
-                Quaternion targetRotation = Quaternion.Euler(0f, 0f, targetAngle - 90f);
-
-                transform.rotation = Quaternion.RotateTowards(
-                    transform.rotation,
-                    targetRotation,
-                    rotationSpeed * Time.deltaTime
-                );
-            }
+            transform.rotation = Quaternion.RotateTowards(
+                transform.rotation,
+                targetRotation,
+                rotationSpeed * Time.deltaTime
+            );
         }
     }
 
@@ -255,49 +255,55 @@ public class PlayerController : MonoBehaviour, IStatOwner
 
     private void DashMove()
     {
-        Vector2 velocity = lastMoveDirection * dashSpeed;
-        ApplyVelocity(velocity);
+        ApplyVelocity(lastMoveDirection * dashSpeed);
     }
 
     #endregion
 
-    #region Attack State
+    #region Attack (Fire Rate Interval)
 
-    private void UpdateAttackState()
+    private void UpdateAttack()
     {
-        switch (attackState)
+        bool wantsAttack = input.attackHeld || input.attackBuffered;
+        input.attackBuffered = false;
+
+        if (wantsAttack && Time.time >= nextAttackTime)
         {
-            case AttackState.None:
-                if (input.attackPressed)
-                    EnterAttack();
-                break;
-
-            case AttackState.Attacking:
-                attackTimer -= Time.deltaTime;
-                if (attackTimer <= 0f)
-                    attackState = AttackState.None;
-                break;
+            nextAttackTime = Time.time + AttackInterval;
+            Shoot();
         }
-    }
-
-    private void EnterAttack()
-    {
-        attackState = AttackState.Attacking;
-        attackTimer = attackDuration;
-        input.attackPressed = false;
-
-        Shoot();
     }
 
     private void Shoot()
     {
         if (projectilePrefab == null) return;
 
-        Vector2 shootDir = rotateTowardsMouse ? (Vector2)transform.up : lastMoveDirection;
         Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position;
+        Vector2 shootDir = GetConsistentShootDirection(spawnPos);
 
-        GameObject proj = Instantiate(projectilePrefab, spawnPos, transform.rotation);
-        proj.GetComponent<Projectile>().Init(shootDir, attackDamage);
+        float angle = Mathf.Atan2(shootDir.y, shootDir.x) * Mathf.Rad2Deg;
+        Quaternion projRotation = Quaternion.Euler(0f, 0f, angle - 90f);
+
+        GameObject projObj = Instantiate(projectilePrefab, spawnPos, projRotation);
+        if (projObj.TryGetComponent<Projectile>(out var proj))
+        {
+            proj.Init(this, shootDir, projectileSpeed, projectileLifetime, stats.Attack);
+        }
+    }
+
+    private Vector2 GetConsistentShootDirection(Vector3 spawnPos)
+    {
+        if (rotateTowardsMouse && TryGetMouseWorldPosition(out Vector3 mouseWorldPos))
+        {
+            Vector2 aimDir = (Vector2)(mouseWorldPos - spawnPos);
+            if (aimDir.sqrMagnitude > 0.0001f)
+                return aimDir.normalized;
+        }
+
+        if (rotateTowardsMouse)
+            return ((Vector2)transform.up).sqrMagnitude > 0.0001f ? ((Vector2)transform.up).normalized : Vector2.up;
+
+        return lastMoveDirection.sqrMagnitude > 0.0001f ? lastMoveDirection.normalized : Vector2.down;
     }
 
     #endregion

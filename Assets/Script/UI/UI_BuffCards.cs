@@ -106,7 +106,7 @@ public class UI_BuffCards : MonoBehaviour, IUIController
                 break;
 
             case StatType.AttackDamage:
-                player.attackDamage += buff.statValue;
+                player.Stats.Attack += buff.statValue;
                 break;
 
             case StatType.Defense:

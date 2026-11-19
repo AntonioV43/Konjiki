@@ -142,7 +142,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInput
   move: {x: 0, y: 0}
-  attackPressed: 0
+  attackHeld: 0
+  attackBuffered: 0
   dashPressed: 0
 --- !u!114 &1043195326348628243
 MonoBehaviour:
@@ -280,10 +281,11 @@ MonoBehaviour:
   dashSpeed: 15
   dashDuration: 0.15
   dashCooldown: 1
-  attackDuration: 0.3
+  fireRate: 2
   projectilePrefab: {fileID: 2618448626308388121, guid: 99f42304811cda643baec50f51ecb8a4, type: 3}
   firePoint: {fileID: 161525705178510674}
-  attackDamage: 10
+  projectileSpeed: 12
+  projectileLifetime: 2
   stats:
     Name: Player
     MaxHP: 100
