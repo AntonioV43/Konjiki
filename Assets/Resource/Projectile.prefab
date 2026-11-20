@@ -82,12 +82,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb14d464c14ff5442a7e7244c95d253e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Projectile
-  speed: 12
-  lifetime: 2
-  damage: 10
   hitMask:
     serializedVersion: 2
     m_Bits: 64
+  wallMask:
+    serializedVersion: 2
+    m_Bits: 8
 --- !u!1 &3836469816702049169
 GameObject:
   m_ObjectHideFlags: 0

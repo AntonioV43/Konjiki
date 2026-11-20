@@ -305,6 +305,11 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 6435621219562610967, guid: 3fe45b5efdabd664ea19b6af7fe7a4f4, type: 3}
   m_PrefabInstance: {fileID: 569333938}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1138027182 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4767366177162575350, guid: e2482c9ad21fc7f41b00b1aafa216d40, type: 3}
+  m_PrefabInstance: {fileID: 1372552497}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1152887077
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -371,9 +376,17 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1947199129193363161, guid: e2482c9ad21fc7f41b00b1aafa216d40, type: 3}
+      propertyPath: fireRate
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1947199129193363161, guid: e2482c9ad21fc7f41b00b1aafa216d40, type: 3}
       propertyPath: healthBar
       value: 
       objectReference: {fileID: 1973063016}
+    - target: {fileID: 1947199129193363161, guid: e2482c9ad21fc7f41b00b1aafa216d40, type: 3}
+      propertyPath: projectileLifetime
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2898054335861796741, guid: e2482c9ad21fc7f41b00b1aafa216d40, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -433,19 +446,37 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4767366177162575350, guid: e2482c9ad21fc7f41b00b1aafa216d40, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1951437047}
   m_SourcePrefab: {fileID: 100100000, guid: e2482c9ad21fc7f41b00b1aafa216d40, type: 3}
 --- !u!114 &1951437041 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1043195326348628243, guid: e2482c9ad21fc7f41b00b1aafa216d40, type: 3}
   m_PrefabInstance: {fileID: 1372552497}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1138027182}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
+--- !u!114 &1951437047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138027182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a2e1e1849cf47f4dbc81ee0f1aac939, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectileModifierHandler
+  activeModifiers:
+  - {fileID: 11400000, guid: 6012c454296158741903aa1ab04e40a5, type: 2}
+  - {fileID: 11400000, guid: 65329a4f5b0e70448ad8a25cb3bde99e, type: 2}
 --- !u!114 &1973063016 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 9047691392540380323, guid: 3fe45b5efdabd664ea19b6af7fe7a4f4, type: 3}

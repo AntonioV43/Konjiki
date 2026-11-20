@@ -36,7 +36,8 @@ public class PlayerController : MonoBehaviour, IStatOwner
     public GameObject projectilePrefab;
     public Transform firePoint;
     public float projectileSpeed = 12f;
-    public float projectileLifetime = 2f;
+    [Tooltip("Jarak tempuh maksimal peluru dalam satuan unit")]
+    public float projectileRange = 12f;
 
     [Header("Stats (Single Source of Damage)")]
     [SerializeField] private CharacterStats stats = new CharacterStats { Name = "Player", MaxHP = 100, Attack = 10 };
@@ -61,6 +62,8 @@ public class PlayerController : MonoBehaviour, IStatOwner
 
     public float AttackInterval => 1f / Mathf.Max(0.01f, fireRate);
 
+    private ProjectileModifierHandler modifierHandler;
+
     #endregion
 
     #region IStatOwner
@@ -76,6 +79,7 @@ public class PlayerController : MonoBehaviour, IStatOwner
         input = GetComponent<InputControll>();
         rb = GetComponent<Rigidbody2D>();
         mainCam = Camera.main;
+        modifierHandler = GetComponent<ProjectileModifierHandler>();
     }
 
     private void OnEnable()
@@ -278,17 +282,86 @@ public class PlayerController : MonoBehaviour, IStatOwner
     {
         if (projectilePrefab == null) return;
 
-        Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position;
-        Vector2 shootDir = GetConsistentShootDirection(spawnPos);
+        ProjectileSpawnPlan plan = modifierHandler != null
+            ? modifierHandler.BuildSpawnPlan(projectileSpeed, projectileRange, stats.Attack)
+            : new ProjectileSpawnPlan
+            {
+                burstCount = 1,
+                radialCount = 1,
+                spreadCount = 1,
+                spreadAngle = 0f,
+                burstInterval = 0f,
+                speed = projectileSpeed,
+                range = projectileRange,
+                sizeMultiplier = 1f,
+                damage = stats.Attack
+            };
 
+        StartCoroutine(SpawnProjectileSequence(plan));
+    }
+
+    private System.Collections.IEnumerator SpawnProjectileSequence(ProjectileSpawnPlan plan)
+    {
+        WaitForSeconds wait = plan.burstInterval > 0f ? new WaitForSeconds(plan.burstInterval) : null;
+
+        for (int b = 0; b < plan.burstCount; b++)
+        {
+            Vector3 baseSpawnPos = firePoint != null ? firePoint.position : transform.position;
+            Vector2 aimDir = GetConsistentShootDirection(baseSpawnPos);
+
+            float radialStep = 360f / plan.radialCount;
+            for (int r = 0; r < plan.radialCount; r++)
+            {
+                Vector2 radialDir = RotateVector(aimDir, radialStep * r);
+
+                for (int s = 0; s < plan.spreadCount; s++)
+                {
+                    float spreadOffset = 0f;
+                    if (plan.spreadCount > 1)
+                    {
+                        float normalizedPos = (float)s / (plan.spreadCount - 1) - 0.5f;
+                        spreadOffset = normalizedPos * plan.spreadAngle;
+                    }
+
+                    Vector2 finalDir = RotateVector(radialDir, spreadOffset);
+                    Vector3 spawnOffset = Vector3.zero;
+
+                    if (modifierHandler != null)
+                        modifierHandler.ApplyTrajectoryModifiers(s, plan.spreadCount, ref finalDir, ref spawnOffset);
+
+                    SpawnSingleProjectile(baseSpawnPos + spawnOffset, finalDir, plan);
+                }
+            }
+
+            if (wait != null && b < plan.burstCount - 1)
+                yield return wait;
+        }
+    }
+
+    private void SpawnSingleProjectile(Vector3 spawnPos, Vector2 shootDir, ProjectileSpawnPlan plan)
+    {
         float angle = Mathf.Atan2(shootDir.y, shootDir.x) * Mathf.Rad2Deg;
         Quaternion projRotation = Quaternion.Euler(0f, 0f, angle - 90f);
 
         GameObject projObj = Instantiate(projectilePrefab, spawnPos, projRotation);
+        projObj.transform.localScale *= plan.sizeMultiplier;
+
         if (projObj.TryGetComponent<Projectile>(out var proj))
         {
-            proj.Init(this, shootDir, projectileSpeed, projectileLifetime, stats.Attack);
+            ProjectileRuntimeState state = modifierHandler != null
+                ? modifierHandler.CreateRuntimeState(isOrbiting: false)
+                : new ProjectileRuntimeState();
+
+            proj.Init(this, shootDir, plan.speed, plan.range, plan.damage, state);
         }
+    }
+
+    private static Vector2 RotateVector(Vector2 v, float degrees)
+    {
+        float rad = degrees * Mathf.Deg2Rad;
+        float sin = Mathf.Sin(rad);
+        float cos = Mathf.Cos(rad);
+        return new Vector2(cos * v.x - sin * v.y, sin * v.x + cos * v.y).normalized;
     }
 
     private Vector2 GetConsistentShootDirection(Vector3 spawnPos)
